@@ -40,7 +40,7 @@ undo.
 | 32 | 2026-10-02 | files removed from the cloud-synced paper folder while a session worked there | missing sibling zip at run time | inputs re-pointed via a paths module + sha256 | provenance P14 | manuscript project workflow plan |
 | 33 | 2026-10-02 | replay certificates belonged to an older manuscript version; the paper had moved on | display-by-display version map | version map; Wolfram rerun pending | paper_numbers N11 | replay package version map |
 | 34 | 2026-10-02 | the scan driver still defaulted hBN B to the superseded model's value | code review while writing this skill | default removed, B required | bz_integration B3 | project commit history |
-| 35 | 2026-10-03 | a record mixed two error norms (156 boxes kept across a restart); not written down at the time | box-level rerun: values identical, error estimates not | scale-history file | provenance P16 | the record's scale-history file |
+| 35 | 2026-10-02 | a record mixed two error norms (156 boxes kept across a restart); not written down at the time | box-level rerun: values identical, error estimates not | scale-history file | provenance P16 | the record's scale-history file |
 
 ## Patterns across incidents
 
