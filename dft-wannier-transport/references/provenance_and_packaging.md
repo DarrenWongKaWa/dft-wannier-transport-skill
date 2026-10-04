@@ -182,6 +182,13 @@ The project's export script:
   result files would ship superseded integrals. A small JSON with only the per-tile evaluation counts rebuilds the
   filed layouts exactly (box ids, limits and targets).
 
+## P18. Session scratch space is temporary
+
+- An analysis that later decisions depend on (a comparison of this project's tools with an upstream package) lived
+  only in a session scratch file for a day. Move such results into the repository when they are made, with a date,
+  the decisions taken on them, and a sensitivity note (what must not be posted).
+- **Source**: the project's upstream-feedback record.
+
 ## Checklist
 
 - [ ] Record filed by script; RUN.json complete; package compared file by file with the tarball.

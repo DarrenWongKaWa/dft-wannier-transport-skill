@@ -99,6 +99,26 @@ material data, the figure scripts) and the computation project's paper handoff n
   number from the data with the paper's own definitions.
 - **Source**: the project's run notes.
 
+## N13. Rewording a manuscript that an audit reads
+
+- **Symptom**: a plain-English (ASD-STE100) rewrite of all prose changed 9 strings the number audit looks up and 2
+  anchors of a paper map. Sentences moved into new paragraphs lost their referents ("the two", "both results"),
+  and one "this term" pointed at a larger object, so a summary credited prior work with the whole result.
+- **Fix**: before rewording, extract the protected strings (audit lookups, map anchors). After rewording, check
+  each file by script: displays byte-identical, inline math identical as a multiset, labels and refs identical,
+  cite keys identical as a multiset and each on its claim, figures and prose numbers unchanged, protected strings
+  present or deliberately replaced (then update the audit). Run the audit, then a read-only cross-section pass for
+  referents, one name per quantity, and scope words. That pass also found one older error (a share attributed to
+  one contribution that belonged to two).
+- **Source**: the project's rewrite record.
+
+## N14. Bookkeeping for parallel reviews
+
+- Parallel reviewers numbered their findings independently (F1, F2, ...); merging by number mixed findings from
+  different reviewers. Key each finding by (reviewer, number) or by a label, and verify each one adversarially
+  before editing. Overclaims (one filling generalised, prior work under-credited) were the most common real finding.
+- **Source**: the project's review workflow log.
+
 ## Before you report a number (checklist)
 
 - [ ] It comes from a filed record (RUN.json), converged N/N boxes, worst err/target <= 1.
@@ -109,3 +129,4 @@ material data, the figure scripts) and the computation project's paper handoff n
 - [ ] Scope stated (strain, filling, temperature); extrapolations labelled.
 - [ ] Recomputed by the audit script from the released data; string asserted in the text; negative control done.
 - [ ] Provenance traceable: record id, package version and sha256, script.
+- [ ] After any rewording: invariants checked by script, audit rerun, cross-section consistency pass (N13).

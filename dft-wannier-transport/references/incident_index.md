@@ -41,6 +41,14 @@ undo.
 | 33 | 2026-10-02 | replay certificates belonged to an older manuscript version; the paper had moved on | display-by-display version map | version map; Wolfram rerun pending | paper_numbers N11 | replay package version map |
 | 34 | 2026-10-02 | the scan driver still defaulted hBN B to the superseded model's value | code review while writing this skill | default removed, B required | bz_integration B3 | project commit history |
 | 35 | 2026-10-02 | a record mixed two error norms (156 boxes kept across a restart); not written down at the time | box-level rerun: values identical, error estimates not | scale-history file | provenance P16 | the record's scale-history file |
+| 36 | 2026-10-03 | order-Gamma slope of a difference of two responses biased by an uncancelled delta/Gamma^2 residue | comparison with a closed-form coefficient | refit with the offset term | bz_integration B15 | record of that analysis |
+| 37 | 2026-10-03 | Delta_FS shell definition used again in a new analysis script | ratios disagreed with the paper | read from the paper's record | conventions C7 | that analysis script |
+| 38 | 2026-10-03 | a BCD from a valley box 0.07 % above the whole zone; methods text claimed 1e-6 | whole-zone integral during a consistency check | methods text corrected | bz_integration B14 | methods appendix; consistency-check record |
+| 39 | 2026-10-03 | Julia `3f2n` read as Float32 literal `3f2` times n in a kernel-check script | caught in the same session (details not recorded) | `3 * f2n` | run_management R12 | derivation scripts |
+| 40 | 2026-10-03 | findings of four parallel reviewers merged by colliding numbers | re-association by log labels | none | paper_numbers N14 | review workflow log |
+| 41 | 2026-10-04 | prose rewrite broke 9 audit strings and 2 map anchors; referents lost at new paragraph breaks | invariant checker, audit, consistency pass | strings updated, 9 fixes; one older mislabel corrected | paper_numbers N13 | the rewrite record |
+| 42 | 2026-10-04 | an upstream-feedback analysis only in a session scratch file | status review | moved into the repository | provenance P18 | upstream-feedback record |
+| 43 | 2026-10-03/04 | zsh glob and `=` expansion, missing `timeout`/`latexmk`, `str.format` on CSS braces | command errors | quoting, bash, placeholder replacement | run_management R12 | session logs |
 
 ## Patterns across incidents
 

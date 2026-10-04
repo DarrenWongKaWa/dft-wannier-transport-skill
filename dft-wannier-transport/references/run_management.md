@@ -123,6 +123,13 @@ filed records lived in the repository.
   density ~700x too large). Check: where the bands near the edges are nearly electron-hole symmetric,
   n(-E_F) ~ n(+E_F) (this held after the fix). Fix: an optional hole mode counting 1 - f of the bands up to the VBM
   band.
+- **Julia numeric literals**: `3f2n` parses as the Float32 literal `3f2` (= 300) times `n`, not as `3 * f2n`;
+  `2e1x` likewise. Write `*` between a number and a name that starts with `e`, `E` or `f`.
+- **zsh (the macOS default shell)**: an unquoted glob with no match aborts the whole command (`no matches found`);
+  a word that starts with `=` expands to a command path (`echo =====` fails); `timeout` and `latexmk` were not
+  installed. Quote patterns, run multi-line scripts with `bash`, and check that a tool exists before a script
+  relies on it (here: `pdflatex`, `bibtex`, `pdflatex`, `pdflatex`).
+- **Templates**: `str.format` on an HTML page fails on the CSS braces. Replace named placeholders explicitly.
 - **Source**: the project's engineering-lessons notes; the project's methods record (hole density fix).
 
 ## R13. Variants as overlay packages, never edits of the frozen package

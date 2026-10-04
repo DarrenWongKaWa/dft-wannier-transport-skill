@@ -77,6 +77,9 @@ per quantity, numeric residual checks, the conversion factor tested to full prec
   across the shell, the two agree closely.
 - Rule: state the definition (contour vs shell width) next to every Delta_FS; converge the shell width to 0 or compute
   on the contour; do not mix tables.
+- It recurred in a later analysis script that recomputed Delta_FS with the shell definition, and its ratios disagreed
+  with the paper. Read Delta_FS, and every derived scale, from the one record the paper uses; never recompute it in a
+  new script.
 - **Source**: the project's run notes; the project's methods record.
 
 ## C8. Crossover scales

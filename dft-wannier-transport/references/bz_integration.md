@@ -163,6 +163,25 @@ units: energies eV, lengths A, hbar = k_B = 1 (conventions_and_units.md C2).
 Estimate before launching: evaluations x seconds per evaluation (for the engine mode you will run) / workers, and
 separately the longest single box.
 
+## B14. A box-integrated limit is truncated: compare it once with the whole zone
+
+- **Symptom**: a clean-limit BCD integrated over a valley box (half-width 0.06) was 0.07 % above the whole-zone
+  integral, while the methods text claimed a 1e-6 integration tolerance. The box tolerance is not the truncation.
+- **Fix/check**: integrate the limit once over the whole zone for each material and filling, state the truncation
+  next to every box-based value, and widen the box until the difference is below the precision you quote.
+- **Source**: the project's methods appendix (corrected).
+
+## B15. Small-Gamma coefficients of a difference: fit the leftover offset
+
+- **Symptom**: the order-Gamma slope of a difference of two computed responses with the same clean limit came out
+  biased for one record. Their 1/Gamma terms cancel analytically, but a numerical residue delta/Gamma^2 survives and
+  dominates at the smallest Gamma.
+- **Fix**: fit delta/Gamma^2 + a + b Gamma + c Gamma^2 with the columns scaled to similar size (Gamma in meV), and
+  report delta and a (both should be ~0) as checks. Take the reference value of each part from the run that
+  produced that part.
+- **Check**: compare the slope with a direct integral of the closed-form leading coefficient when one exists.
+- **Source**: the project's slope-fit scripts and the record of that analysis.
+
 ## Checklist
 
 - [ ] Pocket radius computed; smallest planned box smaller than the pocket radius near the band edge.
@@ -174,3 +193,5 @@ separately the longest single box.
 - [ ] Convergence judged per box; partial aggregates never used.
 - [ ] Fit windows identical across compared records; functional form checked across the window; extrapolations
       labelled.
+- [ ] Box-integrated limits compared once with the whole zone; truncation stated (B14).
+- [ ] Small-Gamma slopes of differences fitted with the offset term; delta and a reported (B15).

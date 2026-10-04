@@ -109,6 +109,13 @@ problem reports, run scripts). They document where a lesson was learned; you do 
     verdicts. [N11](references/paper_numbers.md#n11-certificates-belong-to-a-manuscript-snapshot)
 21. "Reproducible" holds only after a box-level rerun from the shipped repository matched the filed values; a restart
     that kept work done under other settings needs a written history. [P15](references/provenance_and_packaging.md#p15-make-every-record-recomputable-from-its-own-job-file-and-test-it-box-by-box), [P16](references/provenance_and_packaging.md#p16-a-run-restarted-with-another-error-norm-needs-a-scale-history)
+22. A difference of two computed responses keeps a numerical residue of the terms that cancel analytically; fit it
+    before quoting a small-Gamma slope. A box-integrated limit is truncated; compare it once with the whole zone.
+    [B14](references/bz_integration.md#b14-a-box-integrated-limit-is-truncated-compare-it-once-with-the-whole-zone), [B15](references/bz_integration.md#b15-small-gamma-coefficients-of-a-difference-fit-the-leftover-offset)
+23. Rewording a manuscript under an audit: protect the audited strings, keep displays, math, cites and numbers fixed
+    by script, then run a cross-section consistency pass. [N13](references/paper_numbers.md#n13-rewording-a-manuscript-that-an-audit-reads)
+24. Session scratch files vanish; keep analyses in the repository. zsh globs, Julia `3f2n`, `str.format` on CSS.
+    [P18](references/provenance_and_packaging.md#p18-session-scratch-space-is-temporary), [R12](references/run_management.md#r12-scripted-edits-and-cli-pitfalls)
 
 The full list of documented incidents with dates and costs: [incident_index](references/incident_index.md).
 
@@ -139,6 +146,7 @@ The full list of documented incidents with dates and costs: [incident_index](ref
 - [ ] Scope: which strain, filling, temperature; extrapolations and fit windows labelled; no generalisation from one case.
 - [ ] Recomputed from the released data by the audit script; string asserted in the text; negative control passed.
 - [ ] Partial aggregates, superseded models and archived records never used as sources.
+- [ ] A box-integrated reference (e.g. B) compared once with the whole zone; truncation stated.
 
 ## Working rules carried over from the project
 
@@ -159,4 +167,4 @@ The full list of documented incidents with dates and costs: [incident_index](ref
 | [references/provenance_and_packaging.md](references/provenance_and_packaging.md) | RUN.json records, frozen packages, deterministic tar/zip, one deliverable, PROBLEMS.md, private export, licensed files |
 | [references/paper_numbers.md](references/paper_numbers.md) | audit scripts, negative controls, snapshots, data paths, narrative re-check, generalisation, methods with citations |
 | [references/conventions_and_units.md](references/conventions_and_units.md) | the single 1/2, SI factor, sheet units, tau = hbar / (2 Gamma), mobility, cyclotron mass, fillings, Delta_FS, crossover-scale definitions |
-| [references/incident_index.md](references/incident_index.md) | 35 documented incidents: date, detection, cost, rule, source |
+| [references/incident_index.md](references/incident_index.md) | 43 documented incidents: date, detection, cost, rule, source |
