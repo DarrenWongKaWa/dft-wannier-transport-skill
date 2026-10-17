@@ -157,6 +157,8 @@ filed records lived in the repository.
   marker text for its unclaimed boxes. Running workers finish their current boxes and exit, and no work is lost. To
   resume, delete only the claim files that carry the marker, and start a pool for the job.
 - Use it when killing processes is not allowed or not safe. Record the marker text and the time in the run notes.
+- When you start the pool again, give the workers new numbers. A pool that started again with the same numbers wrote
+  over the logs of the first workers, and with them their CPU time (2026-10-17: the box times gave an estimate).
 
 ## R16. A pool writes the job fingerprint before it starts workers
 

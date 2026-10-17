@@ -176,4 +176,4 @@ The full list of documented incidents with dates and costs: [incident_index](ref
 | [references/provenance_and_packaging.md](references/provenance_and_packaging.md) | RUN.json records, frozen packages, deterministic tar/zip, one deliverable, PROBLEMS.md, private export, licensed files |
 | [references/paper_numbers.md](references/paper_numbers.md) | audit scripts, negative controls, snapshots, data paths, narrative re-check, generalisation, methods with citations |
 | [references/conventions_and_units.md](references/conventions_and_units.md) | the single 1/2, SI factor, sheet units, tau = hbar / (2 Gamma), mobility, cyclotron mass, fillings, Delta_FS, crossover-scale definitions |
-| [references/incident_index.md](references/incident_index.md) | 52 documented incidents: date, detection, cost, rule, source |
+| [references/incident_index.md](references/incident_index.md) | 53 documented incidents: date, detection, cost, rule, source |

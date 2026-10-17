@@ -58,6 +58,7 @@ undo.
 | 50 | 2026-10-17 | A data build gave outputs 1 ulp apart under Python 3.9 and 3.14 (compensated `sum()`). | `--check` under two versions. | `math.fsum` in the build scripts. One report sentence changed. | conventions C13 | data build scripts |
 | 51 | 2026-10-17 | Another study quoted a ratio of two parts of a turned tensor component 0.07 deg from a zero crossing. | Rotation law of the tensor. Angle scan. | Frame-free measures reported. | symmetry_and_selection_rules S9 | audit of the zero-temperature candidate study |
 | 52 | 2026-10-17 | Every "mu in the gap" ratio of that study had Gamma / delta = 1.75 to 13.5 (N15). | Gamma / delta for every point. | Regime stated with every ratio. | paper_numbers N15 | same audit |
+| 53 | 2026-10-17 | A pool started again with the same worker numbers wrote over the logs of the first workers. | Missing CPU time in the run record. | CPU time of the first part estimated from the box times. | run_management R15 | run record of that job |
 
 ## Patterns across incidents
 
