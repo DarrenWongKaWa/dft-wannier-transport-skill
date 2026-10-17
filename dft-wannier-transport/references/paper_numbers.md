@@ -119,6 +119,15 @@ material data, the figure scripts) and the computation project's paper handoff n
   before editing. Overclaims (one filling generalised, prior work under-credited) were the most common real finding.
 - **Source**: the project's review workflow log.
 
+## N15. Before you use the numbers of another agent or study
+
+- Reproduce them with your own engine at the same points first (11 of 11 points agreed to 5 digits, 2026-10-17).
+- Then check what the numbers mean. Compare the component with the convention of the paper (one point used yxx where
+  the paper uses xyy). Check the frame (S9: a tuned angle near a zero crossing). Check the regime: for a response "with
+  mu in the gap" at broadening Gamma, compare Gamma with the distance delta of mu from the nearest band edge.
+- For Gamma > delta the band-edge states are inside the Lorentzian, and the response is metal-like. Every point of
+  that study had Gamma / delta between 1.75 and 13.5.
+
 ## Before you report a number (checklist)
 
 - [ ] It comes from a filed record (RUN.json), converged N/N boxes, worst err/target <= 1.

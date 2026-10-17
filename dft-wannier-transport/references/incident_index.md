@@ -49,6 +49,15 @@ undo.
 | 41 | 2026-10-04 | prose rewrite broke 9 audit strings and 2 map anchors; referents lost at new paragraph breaks | invariant checker, audit, consistency pass | strings updated, 9 fixes; one older mislabel corrected | paper_numbers N13 | the rewrite record |
 | 42 | 2026-10-04 | an upstream-feedback analysis only in a session scratch file | status review | moved into the repository | provenance P18 | upstream-feedback record |
 | 43 | 2026-10-03/04 | zsh glob and `=` expansion, missing `timeout`/`latexmk`, `str.format` on CSS braces | command errors | quoting, bash, placeholder replacement | run_management R12 | session logs |
+| 44 | 2026-10-17 | A session edited a docstring of the fingerprinted integrand code while jobs ran. | Noticed in the same session. | Bytes restored. Fingerprints checked equal. | run_management R17 | session log of the zero-temperature runs |
+| 45 | 2026-10-17 | Error-scale floor per component. A component that vanishes by a mirror got a target that no box could meet. | The entry with the largest error/scale in each unconverged box. | 37 of 128 boxes at their caps, 30x the evaluations. Floor rule changed for later jobs. | symmetry_and_selection_rules S7 | candidate-model job maker |
+| 46 | 2026-10-17 | One spin block of a TRS pair, half zone x 2, without the k -> -k average. | 110 and 99 of 128 boxes at their caps. Pointwise parity test. | Two jobs replaced by one averaged job (127 of 128 converged). | bz_integration B7 | candidate-model job maker, local archive note |
+| 47 | 2026-10-17 | Point caches of all-component jobs filled the disk to 96 % within an hour. | Free-disk check during the runs. | Queued jobs held by marker claims. Finished caches compressed in place. Jobs released by free disk. | run_management R14, R15 | session log of the zero-temperature runs |
+| 48 | 2026-10-17 | Two finished job folders moved while a live pool still read their job files. | Noticed at once. | Moved back within seconds. Archived after the pool ended. | run_management R6 | session log |
+| 49 | 2026-10-17 | A new pool script did not write the job fingerprints before the first workers. | Review of the first job folder. | Fingerprints written before any worker started. | run_management R16 | pool scripts |
+| 50 | 2026-10-17 | A data build gave outputs 1 ulp apart under Python 3.9 and 3.14 (compensated `sum()`). | `--check` under two versions. | `math.fsum` in the build scripts. One report sentence changed. | conventions C13 | data build scripts |
+| 51 | 2026-10-17 | Another study quoted a ratio of two parts of a turned tensor component 0.07 deg from a zero crossing. | Rotation law of the tensor. Angle scan. | Frame-free measures reported. | symmetry_and_selection_rules S9 | audit of the zero-temperature candidate study |
+| 52 | 2026-10-17 | Every "mu in the gap" ratio of that study had Gamma / delta = 1.75 to 13.5 (N15). | Gamma / delta for every point. | Regime stated with every ratio. | paper_numbers N15 | same audit |
 
 ## Patterns across incidents
 

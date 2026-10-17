@@ -116,6 +116,12 @@ per quantity, numeric residual checks, the conversion factor tested to full prec
   its closed form), not as a tolerance-based "close enough". Keep a small suite and run it after any change to kernels
   or conversions.
 
+## C13. Python versions add floats differently
+
+- Python 3.12 and later use compensated summation in `sum()` of floats. Python 3.9 does not. The same build script
+  gave outputs that differed by 1 ulp between the two (2026-10-17). A build that must give the same bytes on every
+  machine uses `math.fsum` (exactly rounded) or a fixed explicit order, and its `--check` mode runs under each version.
+
 ## Checklist
 
 - [ ] One written definition per quantity (sigma, B, fitted coefficients, E_F, Delta_FS, crossover scales, tau, m_c).

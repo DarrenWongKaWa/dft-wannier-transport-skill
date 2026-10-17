@@ -182,6 +182,14 @@ refused to scan when `max abs(E(k) - E(-k)) >= 1e-5 eV` (source: the manifold-ch
   (bz_integration.md B3).
 - **Source**: the manifold-check run record; the README of the disentangled Wannier model.
 
+## W14. Band edges of models with degenerate bands
+
+- Tools that need isolated bands (exact inverse gaps) stop at Kramers pairs ("isolated bands required"). For band
+  edges, search with the eigenvalues only: a whole-zone grid, then zoom steps around the best points.
+- When you port a model from another code, compare energies, |v_nm|^2 and the Berry curvature at random k (they agreed
+  to 3e-12). A different Bloch-phase convention (exp(ik.R) against exp(ik.(R + r_j - r_i))) changes the gauge but
+  not these quantities.
+
 ## Checklist (copy into the run notes)
 
 - [ ] NBANDS of the NSCF covers the outer window and the first states above the target manifold.

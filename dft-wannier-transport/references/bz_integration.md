@@ -96,6 +96,15 @@ units: energies eV, lengths A, hbar = k_B = 1 (conventions_and_units.md C2).
   u <= 7, then double. Exact only if E(k) = E(-k) and the TRS-even integrand is symmetric, i.e. the model is real
   (wannierization.md W6). With a TRS-broken model the doubling silently produces a different integral.
 - Record the reconstruction rule in the result file ("half zone (u+v<15, and u+v=15 with u<=7) x 2 under k -> -k").
+- **One block of a time-reversal pair** (one spin of a spin-conserving model) is not TRS-symmetric. Its rows contain
+  parts that are odd in k, so half zone x 2 of one block is not its whole zone. The sum of the two blocks over the same
+  half zone is the total only if block 2 at -k equals block 1 at k. Check this pointwise.
+- Better: average the integrand over k and -k. Then one job gives the whole-zone value of one block (2x for both
+  blocks). The odd parts cancel at each point, and the boxes converge. Without the average, two all-component jobs left
+  110 and 99 of 128 boxes at their caps (5.8e6 and 5.6e6 evaluations). With it, 127 of 128 boxes converged with 1.2e5
+  evaluations (2026-10-17).
+- **Check the parity, do not assume it**: evaluate every integrated row at k and -k at a few random points. Real
+  (TRS) models gave differences of 0, or of 1e-8 relative for Wannier models from DFT. Single spin blocks gave O(1).
 
 ## B8. Point caches and checkpoints
 
@@ -147,6 +156,9 @@ units: energies eV, lengths A, hbar = k_B = 1 (conventions_and_units.md C2).
 - Claims about the functional form of a response in Gamma (e.g. "linear"): check the relevant ratio across the fit
   window before quoting a fitted coefficient, and use the same fit window for every record you compare (fits over
   different windows differed at the percent level).
+- Check a new branch for a limit (for example closed-form kernels at T = 0 next to the finite-T kernels) with the
+  convergence law of the old branch. Halving T divided the difference by 4 at every row (the T^2 law of the Sommerfeld
+  expansion). Where the old branch fails (NaN below some T for one model), use the temperatures where it works.
 - **Source**: the project's run notes; the project's paper handoff notes.
 
 ## B13. Cost model (worked numbers, Mac mini M4 Pro, 1 worker = 1 core)
@@ -181,6 +193,16 @@ separately the longest single box.
   produced that part.
 - **Check**: compare the slope with a direct integral of the closed-form leading coefficient when one exists.
 - **Source**: the project's slope-fit scripts and the record of that analysis.
+
+## B16. Coarse-grid estimates miss band-edge features at small broadening
+
+- **Symptom**: error scales from a midpoint-grid estimate (128 x 128 or 256 x 256) were wrong by factors of 10 to 1e5
+  for a row that peaks at a band edge (a Fermi-sea dipole term with mu near an edge and Gamma of the order of the
+  distance delta to the edge). Rows that do not peak at the edge agreed with the converged values to 1e-3.
+- **Cause**: the grid step does not resolve the width of the feature in k. The grid either misses the feature or hits it.
+- **Fix**: use grid estimates only where they agree with one adaptive box. Take the scales of edge-peaked rows from a
+  converged run of one component at the same settings, or from a larger Gamma. Floor all scales as in B3 and S7.
+- **Source**: the project's candidate-model jobs (2026-10-17).
 
 ## Checklist
 

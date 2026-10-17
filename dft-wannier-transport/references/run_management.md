@@ -62,6 +62,8 @@ filed records lived in the repository.
   - workers use absolute paths (they did; that is why a move kills them instead of writing elsewhere);
   - when tools move (the toolchain moved to a machine-wide tools folder on 2026-10-02), scripts written earlier keep
     the old paths: note the move in the README, keep a compatibility note, do not edit archived scripts.
+  - this includes the folders of finished jobs that a live pool still lists. The pool reads every job file in each
+    loop, so a moved folder ends the pool. Archive after the pool exits (2026-10-17, moved back within seconds).
 - **Source**: the project's run notes (interruption section); the toolchain README.
 
 ## R7. A scan is done only when its aggregation covers every box
@@ -137,6 +139,39 @@ filed records lived in the repository.
 - For a manifold check or a strain series: unpack the release tarball into the run directory, replace only
   `inputs/<material>/` (tb, wsvec), rewrite MODEL.json with new hashes and `notes: "OVERLAY ONLY (not a release)"`.
 - The frozen package stays bit-identical; the record says which inputs were overlaid.
+
+## R14. Disk budget of point caches
+
+- **Symptom**: on 2026-10-17, 22 GB of the disk were free, and the queued jobs would have written ~200 GB of point
+  cache: each all-component job with boxes at their caps wrote ~10 GB.
+- **Estimate before you start**: cache bytes = evaluations x entries x 16 (complex values), with entries = rows x
+  components x Gamma values. A job of 6 rows, 6 components and 6 Gamma that hits its caps (3e6 evaluations) writes
+  ~10 GB.
+- **Fix**: release queued jobs one or two at a time, only while the free disk is above a threshold. Compress the caches
+  of finished jobs in place (gzip -1 gave 1.5x to 3.6x, and `gzip -t` checks each archive). This is archiving: the
+  data stay complete, and `gunzip` restores them. Do not delete caches.
+
+## R15. Pause a claims queue without killing processes
+
+- Workers claim boxes by creating claim files. To pause a job (priority change, disk space), create claim files with a
+  marker text for its unclaimed boxes. Running workers finish their current boxes and exit, and no work is lost. To
+  resume, delete only the claim files that carry the marker, and start a pool for the job.
+- Use it when killing processes is not allowed or not safe. Record the marker text and the time in the run notes.
+
+## R16. A pool writes the job fingerprint before it starts workers
+
+- A worker that finds no fingerprint in job.json writes one. Several workers started at once on a fresh job then
+  write job.json at the same time. The first pool of the project wrote all fingerprints at its start. A pool written
+  later from scratch did not (found before any worker started, 2026-10-17). Write the fingerprints with one process
+  (atomic replace) before the first worker.
+
+## R17. Never edit files whose hash is in the fingerprint of a running job
+
+- The fingerprint holds the sha256 of the integrand code. An edit of a comment in that code changes the fingerprint,
+  and new workers then refuse the job or write boxes of another fingerprint. On 2026-10-17 a session edited a docstring
+  during runs and restored it byte for byte.
+- Commit the code exactly as the runs used it. Fix comments in a later commit, and state that the change is a comment
+  only (a box rerun gives identical values).
 
 ## Pre-launch checklist (long run)
 

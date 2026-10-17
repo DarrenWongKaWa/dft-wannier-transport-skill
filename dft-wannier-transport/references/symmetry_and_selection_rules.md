@@ -83,6 +83,11 @@ same order as the manifold uncertainty (~2 %), and say so.
 - **Cause**: error scales set from a near-zero net value ask for absolute accuracy on a cancelling sum.
 - **Fix**: take the error scales from a comparable nonzero case (the production-strain run). Here the switch came after
   156 of 239 boxes; finished boxes were kept (their error bounds are conservative).
+- **Recurrence (2026-10-17)**: a floor "1e-6 x the largest row of the same component" is the noise of the estimate when
+  the whole component vanishes by a mirror. No box can meet it: 37 of 128 boxes stopped at their caps, and the job
+  took 30x the evaluations of a comparable converged job. Floor every scale at a fraction of the largest entry over
+  all components at that Gamma. Diagnose by listing, for each unconverged box, the entry with the largest
+  error/scale. Here it was always one component.
 - **Source**: the strain-series section of the project's methods record; the scale file of the s = 0 run.
 
 ## S8. Which components to compute
@@ -90,6 +95,20 @@ same order as the manifold uncertainty (~2 %), and say so.
 - Compute the full symmetry-allowed set that the interpretation needs, plus one forbidden partner as a control; plan
   the set from the symmetry analysis (S1-S4).
 - For a strain series, compute s = 0 too: it is the cheapest symmetry test and the reference point of the series.
+
+## S9. Ratios in a turned frame: use measures that do not depend on the frame
+
+- **Symptom**: a study quoted a ratio of two parts of one tensor component, |A_y'x'x'| / |B_y'x'x'|, in a frame turned
+  by an angle theta that was 0.07 deg from a zero of the denominator. Near that angle the ratio changed by a factor of
+  about 2 for each 0.1 deg. A choice of the angle can give any ratio.
+- **Fix**: report measures that do not depend on the frame: the Frobenius norms of the two tensors, and the
+  amplitudes of the angular harmonics of the response. A rank-3 in-plane tensor gives first and third harmonics of
+  theta, and their amplitudes are invariant. A symmetry angle (30 deg, where a threefold part cancels) is physical. A
+  tuned angle near a zero crossing is not.
+- **Check of the tensor form**: a response built from an in-plane vector, such as the 2D Berry-curvature dipole
+  eps_ac D_b + eps_ab D_c, gives a Hall response with the first harmonic only and no longitudinal part. Its third
+  harmonic and its longitudinal part must vanish to rounding (they did, below 1e-12 relative).
+- **Source**: the project's audit of a zero-temperature candidate study (2026-10-17).
 
 ## Checklist
 
