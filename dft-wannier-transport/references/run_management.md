@@ -175,6 +175,14 @@ filed records lived in the repository.
 - Commit the code exactly as the runs used it. Fix comments in a later commit, and state that the change is a comment
   only (a box rerun gives identical values).
 
+## R18. Other users' jobs on the same machine
+
+- Check the load before an MPI run (`uptime`, `ps`). An MPI run on all cores, next to the jobs of another user,
+  oversubscribed the machine.
+- To stop VASP cleanly, write `LSTOP = .TRUE.` into STOPCAR: VASP stops after the current ionic step and writes
+  CONTCAR. Keep the first part (OSZICAR, a note), and continue from CONTCAR on fewer ranks.
+- Do not stop or slow the processes of another user. Keep your own load within the free cores (MPI ranks plus scan
+  workers).
 ## Pre-launch checklist (long run)
 
 - [ ] Model passed all gates (wannierization.md); mu, T, B, Gamma grid, components explicit in job.json.

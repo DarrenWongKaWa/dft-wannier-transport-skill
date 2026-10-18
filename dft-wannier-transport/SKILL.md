@@ -125,6 +125,9 @@ problem reports, run scripts). They document where a lesson was learned; you do 
 27. Near a zero crossing, the ratio of two parts of a turned tensor component can have any value. Report frame-free
     measures (norms, angular harmonics), and state Gamma against the distance of mu from the band edge.
     [S9](references/symmetry_and_selection_rules.md#s9-ratios-in-a-turned-frame-use-measures-that-do-not-depend-on-the-frame), [N15](references/paper_numbers.md#n15-before-you-use-the-numbers-of-another-agent-or-study)
+28. Non-symmorphic crystals: bands stick together in pairs on zone-boundary lines. Pair model and DFT states from the
+    bottom. A split with a third-band energy denominator is singular there: integrate only regular sums. A two-band toy
+    model has no three-band terms: confirm its ratios with a multi-band model. [W16](references/wannierization.md#w16-pairs-of-stuck-bands-pair-model-and-dft-states-from-the-bottom), [S10](references/symmetry_and_selection_rules.md#s10-band-resolved-splits-are-singular-where-bands-stick-together), [N16](references/paper_numbers.md#n16-a-toy-model-can-miss-the-term-that-competes-with-the-effect)
 
 The full list of documented incidents with dates and costs: [incident_index](references/incident_index.md).
 
@@ -169,11 +172,11 @@ The full list of documented incidents with dates and costs: [incident_index](ref
 
 | file | content |
 | --- | --- |
-| [references/wannierization.md](references/wannierization.md) | manifold choice, entangled vs isolated, vacuum NFE states, frozen windows, convergence, realness/TRS, gauge reproducibility, off-grid validation, get_AA_R build, manifold bracket |
-| [references/symmetry_and_selection_rules.md](references/symmetry_and_selection_rules.md) | point groups, strain to break C3, vanishing components, relations between components, symmetry partners as checks, cost of symmetric zeros, frame-free measures |
+| [references/wannierization.md](references/wannierization.md) | manifold choice, entangled vs isolated, vacuum NFE states, frozen windows, convergence, realness/TRS, gauge reproducibility, off-grid validation, get_AA_R build, manifold bracket, excluded bands, stuck band pairs |
+| [references/symmetry_and_selection_rules.md](references/symmetry_and_selection_rules.md) | point groups, strain to break C3, vanishing components, relations between components, symmetry partners as checks, cost of symmetric zeros, frame-free measures, splits at band sticking, symmetry errors of a model |
 | [references/bz_integration.md](references/bz_integration.md) | pocket sizing, adaptive budgets, error scales, quadtree pre-split, cancellation, pass 2, half zone, caches, certification, grids, limits, cost model |
-| [references/run_management.md](references/run_management.md) | cores and MPI, threads, SIGSTOP scheduling, claims queue, resuming, moving folders, aggregation, fail-fast, gates. Wall-time logging, CLI pitfalls, overlays, disk budget of caches, pausing a queue, fingerprints. |
+| [references/run_management.md](references/run_management.md) | cores and MPI, threads, SIGSTOP scheduling, claims queue, resuming, moving folders, aggregation, fail-fast, gates. Wall-time logging, CLI pitfalls, overlays, disk budget of caches, pausing a queue, fingerprints, other users' jobs. |
 | [references/provenance_and_packaging.md](references/provenance_and_packaging.md) | RUN.json records, frozen packages, deterministic tar/zip, one deliverable, PROBLEMS.md, private export, licensed files |
-| [references/paper_numbers.md](references/paper_numbers.md) | audit scripts, negative controls, snapshots, data paths, narrative re-check, generalisation, methods with citations |
+| [references/paper_numbers.md](references/paper_numbers.md) | audit scripts, negative controls, snapshots, data paths, narrative re-check, generalisation, methods with citations, toy models against multi-band models |
 | [references/conventions_and_units.md](references/conventions_and_units.md) | the single 1/2, SI factor, sheet units, tau = hbar / (2 Gamma), mobility, cyclotron mass, fillings, Delta_FS, crossover-scale definitions |
-| [references/incident_index.md](references/incident_index.md) | 53 documented incidents: date, detection, cost, rule, source |
+| [references/incident_index.md](references/incident_index.md) | 59 documented incidents: date, detection, cost, rule, source |

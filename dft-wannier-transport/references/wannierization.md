@@ -190,6 +190,25 @@ refused to scan when `max abs(E(k) - E(-k)) >= 1e-5 eV` (source: the manifold-ch
   to 3e-12). A different Bloch-phase convention (exp(ik.R) against exp(ik.(R + r_j - r_i))) changes the gauge but
   not these quantities.
 
+## W15. VASP with exclude_bands writes the Wannier90 files of the included bands only
+
+- With `exclude_bands` in the Wannier90 input that VASP writes (LWANNIER90), the `.eig` and `.mmn` files hold only
+  the num_bands bands that Wannier90 uses. A tool that drops the excluded bands from these files a second time fails
+  with an index error, or, worse, uses the wrong bands.
+- Accept both layouts: all bands (drop the excluded ones) or num_bands bands (use them all). Stop with a clear error
+  for any other count.
+- After the change, run the tool on an earlier model (no excluded bands) with the old and the new version. The outputs
+  must be identical, except for the line that names the job folder.
+
+## W16. Pairs of stuck bands: pair model and DFT states from the bottom
+
+- In a non-symmorphic crystal the bands stick together in pairs on whole lines of the zone boundary. A comparison that
+  pairs model and DFT states by the closest energy (argmin) can start at the second state of a pair. Then it compares
+  every state with the next band, or it runs out of states and writes Inf, which a JSON writer refuses.
+- Pair from the bottom: start at the first model state that is not more than a small margin (0.05 eV) below the lowest
+  DFT state of the window. A frozen window reproduces DFT to the meV level, so no partner lies lower than that margin.
+- Run the old and the new check on the earlier models. Their results must not change.
+
 ## Checklist (copy into the run notes)
 
 - [ ] NBANDS of the NSCF covers the outer window and the first states above the target manifold.

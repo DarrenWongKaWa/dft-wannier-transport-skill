@@ -110,6 +110,30 @@ same order as the manifold uncertainty (~2 %), and say so.
   harmonic and its longitudinal part must vanish to rounding (they did, below 1e-12 relative).
 - **Source**: the project's audit of a zero-temperature candidate study (2026-10-17).
 
+## S10. Band-resolved splits are singular where bands stick together
+
+- **Symptom**: a split of the response into two parts used a term with the energy difference to a third band in the
+  denominator. In a non-symmorphic crystal, bands stick together in pairs on whole zone-boundary lines. Near these
+  lines the term grew about as 1/(distance) and had no fixed sign on the two sides. The sum of the two parts, and the
+  other parts of the response, stayed constant there.
+- **Fix**: integrate only the parts that are regular (here the sum of the two parts and the BCD part). Do not report
+  the split for such a crystal, and state why.
+- **Check before a run**: evaluate every row at distances 1e-4 to 1e-7 (fractional) from each band-sticking line, on
+  both sides. A regular row stays constant.
+
+## S11. Symmetry-forbidden components measure the symmetry error of a Wannier model
+
+- A Wannier model does not keep the crystal symmetry exactly: the mirror error of the bands was about 0.1 meV, below
+  the off-grid error of the model. The tensor components that the mirror forbids came out at about 1e-3 of the allowed
+  ones, resolved by the error bounds.
+- Before you symmetrise anything, measure the effect on the quantity you report: set the forbidden components to zero
+  and compute the quantity again. For frame-free ratios the change was about 1e-6 (relative). Report the values as
+  computed, and the size of the check (S5).
+- A ratio of two entries that a symmetry forbids is 0/0. In an exactly symmetric model both are rounding values. In a
+  Wannier model both are model errors, and the error bounds can resolve them. Neither ratio has a meaning. Mark such
+  entries "not resolved" in a table, and use the symmetry to choose the angle: for a BCD vector D on a mirror axis, the
+  field parallel to D gives the largest BCD Hall response.
+
 ## Checklist
 
 - [ ] Point group of every structure recorded (file + tool), allowed components listed.

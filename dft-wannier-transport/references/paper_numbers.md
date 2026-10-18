@@ -128,6 +128,15 @@ material data, the figure scripts) and the computation project's paper handoff n
 - For Gamma > delta the band-edge states are inside the Lorentzian, and the response is metal-like. Every point of
   that study had Gamma / delta between 1.75 and 13.5.
 
+## N16. A toy model can miss the term that competes with the effect
+
+- A two-band toy model has no third band. Every three-band term of the response is zero there. When the background of
+  an effect comes mostly from a three-band term, the toy model gives a ratio effect / background that is much too
+  large.
+- Before you quote a ratio from a toy model as a material property, compute it with a multi-band Wannier model of the
+  material. Give the contribution of each term (row) to the background, so that the reader sees which term the toy
+  model does not have.
+
 ## Before you report a number (checklist)
 
 - [ ] It comes from a filed record (RUN.json), converged N/N boxes, worst err/target <= 1.
