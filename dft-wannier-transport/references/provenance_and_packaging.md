@@ -189,6 +189,22 @@ The project's export script:
   the decisions taken on them, and a sensitivity note (what must not be posted).
 - **Source**: the project's upstream-feedback record.
 
+## P19. Archives on an external exFAT drive: one tar per folder, verified member by member
+
+- On exFAT with 1 MB clusters macOS also writes a `._` AppleDouble file for each file with extended attributes. An rsync
+  of the single cache files took 126.5 GB for 62 GB of data.
+- Pack one uncompressed tar per top folder with `COPYFILE_DISABLE=1 tar --no-xattrs --no-mac-metadata`, write a
+  manifest (path, bytes, sha256, tar), check every member against the manifest, and only then delete the local copy.
+  Extract one folder to seed a rerun.
+
+## P20. Records of runs without process timing
+
+- Workers started by a launcher without `/usr/bin/time` leave the CPU field of the record at 0. Record the sum of the
+  box times (wall time of each box) as a separate field and say so in the note. Under load it is larger than the CPU
+  time.
+- Point caches linked to /dev/null keep large runs within the disk. Then no later run can use the points of the record
+  as a seed or a check. Say this in the note too.
+
 ## Checklist
 
 - [ ] Record filed by script; RUN.json complete; package compared file by file with the tarball.

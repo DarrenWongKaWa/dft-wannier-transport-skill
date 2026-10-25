@@ -127,6 +127,9 @@ filed records lived in the repository.
   band.
 - **Julia numeric literals**: `3f2n` parses as the Float32 literal `3f2` (= 300) times `n`, not as `3 * f2n`;
   `2e1x` likewise. Write `*` between a number and a name that starts with `e`, `E` or `f`.
+- **zsh word splitting**: an unquoted `$LIST` that holds several words is one word in zsh (bash splits it). A list of
+  values of mu passed as `$MU` reached the program as one argument and the parse failed. Use `bash -c`, an array, or
+  `${=LIST}`.
 - **zsh (the macOS default shell)**: an unquoted glob with no match aborts the whole command (`no matches found`);
   a word that starts with `=` expands to a command path (`echo =====` fails); `timeout` and `latexmk` were not
   installed. Quote patterns, run multi-line scripts with `bash`, and check that a tool exists before a script
@@ -183,6 +186,37 @@ filed records lived in the repository.
   CONTCAR. Keep the first part (OSZICAR, a note), and continue from CONTCAR on fewer ranks.
 - Do not stop or slow the processes of another user. Keep your own load within the free cores (MPI ranks plus scan
   workers).
+
+## R19. Do not run a lock-step DFT job next to scan workers
+
+- A 12-rank HSE06 + SOC run shared the 12 cores with 8 scan workers at nice 15. Its SCF steps went from 530 s to
+  950-1100 s, and its CPU time grew by 15 % (ranks wait for each other). The run used 61 CPU-hours against a budget
+  of 60. Nice does not protect MPI (R3).
+- Run the DFT job alone, or reserve its cores and run the workers on the rest. Start the scans after the DFT run.
+- After the last SCF step of a hybrid run, VASP computes the forces (~20 min here) before it writes WAVECAR and PROCAR.
+  The run is not stuck: check the CPU use of the ranks before any action.
+
+## R20. Wait loops and pgrep: the shell of the loop matches its own pattern
+
+- `until ! pgrep -f "NAME.py"; do sleep 60; done` in a tool call never ends: the shell of that call has NAME.py in its
+  command line, so pgrep finds it. Use a bracket pattern (`pgrep -f "[N]AME.py"`), a pattern that only the job has
+  (`julia.*scan_worker.jl`), or wait on a file that the job writes.
+- Count workers with the full pattern (`pgrep -f "julia.*scan_worker.jl"`): a short pattern also matches monitor
+  shells, and a manager then thinks that the cores are full.
+
+## R21. Memory of large SOC or hybrid runs: KPAR
+
+- VASP with KPAR = N keeps the wave functions of all k points on every k group. A noncollinear SCF with 180 k points
+  used 4.4 GB per rank x 4 ranks and pushed a 24 GB machine into 11 GB of swap, which filled the disk.
+- Use KPAR = 1 (or a small KPAR) for large SOC or hybrid runs on one machine. Read "total amount of memory" in the
+  OUTCAR one minute after the start.
+
+## R22. Pools: idle cores in the tail of each job
+
+- A pool that runs one job at a time with 8 workers leaves most cores idle while the last boxes of a job run. A box at
+  a band edge can take half an hour. Run independent pools in parallel within the free cores, or start the next job
+  when only a few boxes remain.
+
 ## Pre-launch checklist (long run)
 
 - [ ] Model passed all gates (wannierization.md); mu, T, B, Gamma grid, components explicit in job.json.

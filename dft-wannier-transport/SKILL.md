@@ -29,6 +29,7 @@ problem reports, run scripts). They document where a lesson was learned; you do 
 - Vacuum and dipole correction recorded; ISYM and k mesh fixed for the Wannier NSCF; POTCAR by name + sha256 only.
 - Plan the off-grid NSCF now: Wannier-mesh cell centres, rings around extrema, a band-edge patch, a band path.
 - Rebuilt or new toolchain? Reproduce a stored SCF first (energy, E-fermi, target-band eigenvalues).
+- Expensive (hybrid, SOC) run: plan LWAVE, LORBIT and KPAR before the start. Run it alone on the cores ([W18](references/wannierization.md#w18-vasp--wannier90-in-library-mode-check-which-wavecar-is-in-the-folder), [R19](references/run_management.md#r19-do-not-run-a-lock-step-dft-job-next-to-scan-workers))
 
 **2. Wannier model** ([wannierization](references/wannierization.md))
 - Per-k projectability and sigma_min(A) of the candidate projections before MLWF. Failed models had sigma_min
@@ -37,6 +38,7 @@ problem reports, run scripts). They document where a lesson was learned; you do 
   non-target state; outer window = all bands.
 - Converge disentanglement and MLWF (conv_window > 0); rerun with another dis_mix_ratio; compare Omega, centres, H(R).
 - Real H(R), A(R); max abs(E(k) - E(-k)) < 1e-5 eV over the whole BZ, all bands. Gate scripts on it.
+  Spinor models: also the Kramers relation of H(R) and equal `wsvec` images within each pair ([W17](references/wannierization.md#w17-spinor-models-the-images-of-wannier90_wsvecdat-can-break-time-reversal)).
 - Off-grid error near mu (target: ~1 meV); band edges vs DFT; mu re-derived for this model.
 - Bracket the manifold (smaller and larger) before trusting percent-level numbers.
 
@@ -128,6 +130,17 @@ problem reports, run scripts). They document where a lesson was learned; you do 
 28. Non-symmorphic crystals: bands stick together in pairs on zone-boundary lines. Pair model and DFT states from the
     bottom. A split with a third-band energy denominator is singular there: integrate only regular sums. A two-band toy
     model has no three-band terms: confirm its ratios with a multi-band model. [W16](references/wannierization.md#w16-pairs-of-stuck-bands-pair-model-and-dft-states-from-the-bottom), [S10](references/symmetry_and_selection_rules.md#s10-band-resolved-splits-are-singular-where-bands-stick-together), [N16](references/paper_numbers.md#n16-a-toy-model-can-miss-the-term-that-competes-with-the-effect)
+29. Spinor models: Kramers partners can get different images in `wsvec`, which breaks E(k) = E(-k). Check the image
+    lists per pair. Never scan a model that fails the gate, even with a k -> -k average. [W17](references/wannierization.md#w17-spinor-models-the-images-of-wannier90_wsvecdat-can-break-time-reversal)
+30. Library-mode VASP + Wannier90 can stop before VASP writes WAVECAR. Plan LWAVE and LORBIT before an expensive run.
+    The same start and the same number of SCF steps repeat the run exactly. [W18](references/wannierization.md#w18-vasp--wannier90-in-library-mode-check-which-wavecar-is-in-the-folder)
+31. A Fermi-line ridge at very small Gamma: nested one-dimensional quadrature with breakpoints at the crossings. A
+    Fermi-surface BCD of Kramers-split pairs: integrate on the Fermi lines, because a grid multiplies its error by the
+    cancellation ratio. [B17](references/bz_integration.md#b17-a-fermi-line-ridge-at-very-small-gamma-nested-one-dimensional-quadrature), [B18](references/bz_integration.md#b18-fermi-surface-bcd-of-kramers-split-pairs-integrate-on-the-fermi-lines)
+32. A hybrid DFT run next to scan workers ran 1.8x slower. Run it alone. KPAR > 1 multiplies the memory of SOC runs.
+    A wait loop on `pgrep -f NAME` finds its own shell. [R19](references/run_management.md#r19-do-not-run-a-lock-step-dft-job-next-to-scan-workers), [R20](references/run_management.md#r20-wait-loops-and-pgrep-the-shell-of-the-loop-matches-its-own-pattern), [R21](references/run_management.md#r21-memory-of-large-soc-or-hybrid-runs-kpar)
+33. Literature numbers in a plan: check each against the PDF (version, panel, unit, external or bare field). Check every
+    "for all Gamma" statement by a script over the stored grid. [N17](references/paper_numbers.md#n17-check-the-literature-numbers-of-a-plan-against-the-sources), [N18](references/paper_numbers.md#n18-for-every-gamma-below--is-a-statement-over-the-whole-stored-grid-script-it), [C14](references/conventions_and_units.md#c14-a-perpendicular-field-external-in-dft-often-bare-in-model-papers)
 
 The full list of documented incidents with dates and costs: [incident_index](references/incident_index.md).
 
@@ -179,4 +192,4 @@ The full list of documented incidents with dates and costs: [incident_index](ref
 | [references/provenance_and_packaging.md](references/provenance_and_packaging.md) | RUN.json records, frozen packages, deterministic tar/zip, one deliverable, PROBLEMS.md, private export, licensed files |
 | [references/paper_numbers.md](references/paper_numbers.md) | audit scripts, negative controls, snapshots, data paths, narrative re-check, generalisation, methods with citations, toy models against multi-band models |
 | [references/conventions_and_units.md](references/conventions_and_units.md) | the single 1/2, SI factor, sheet units, tau = hbar / (2 Gamma), mobility, cyclotron mass, fillings, Delta_FS, crossover-scale definitions |
-| [references/incident_index.md](references/incident_index.md) | 59 documented incidents: date, detection, cost, rule, source |
+| [references/incident_index.md](references/incident_index.md) | 70 documented incidents: date, detection, cost, rule, source |

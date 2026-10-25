@@ -134,6 +134,29 @@ same order as the manifold uncertainty (~2 %), and say so.
   entries "not resolved" in a table, and use the symmetry to choose the angle: for a BCD vector D on a mirror axis, the
   field parallel to D gives the largest BCD Hall response.
 
+## S12. Parities and Z2 from a WAVECAR
+
+- Take a point with 2k = K, a reciprocal vector. P maps the plane wave k + G to k + G' with G' = -G - K. Thus the parity
+  of a band is <P> = sum_G c*(G') c(G) exp(2i (k + G).r0) / sum_G abs(c(G))^2, over both spinor components. Use the
+  pseudo wave functions only. The PAW spheres of an atom and its image have the same shape.
+- Find r0 from the POSCAR: the midpoint of two atoms of one kind that maps every atom onto an atom of the same kind.
+  Check P on a band of known parity: the bonding and antibonding pair of a semicore level (W 5s: +1 and -1).
+- In a non-symmorphic crystal the bands are fourfold at some zone-boundary points (two Kramers pairs of opposite
+  parity). There <P> of one band is 0 or any mixture: diagonalize P in each group of degenerate bands
+  (P v = lambda S v with S the overlap of the pseudo wave functions).
+- Z2 (Fu-Kane) from the occupied Kramers pairs at the four points of time-reversal symmetry. A small field
+  (0.005 V/A) left abs(P) within 2e-5 of 1. Cross-check with the Wilson loop of the Wannier model (largest-gap method of
+  Soluyanov and Vanderbilt). A periodic H(k) (Wannier gauge) closes the loop with U(k + b) = U(k).
+
+## S13. Reversal of a perpendicular field: exact only for centrosymmetric ions and a centred dipole layer
+
+- With the field as a uniform external potential (VASP EFIELD, IDIPOL = 3, LDIPOL), inversion maps the problem at +E
+  onto the problem at -E if the ions have a centre of inversion r0 and the dipole correction is centred on r0
+  (DIPOL = r0, so the step lies at z = 0 and 1). Then every second-order conductivity, a polar tensor of rank 3, is
+  odd in E: sigma(-E) = -sigma(E) for every term, mu and Gamma. No run at -E is necessary.
+- Check: the same POSCAR for every field, centrosymmetric to 1e-10 (here 3e-10 A). Check also that the ionic relaxation
+  had no field (no EFIELD in its INCAR). Ions relaxed in the field break the relation. Then run -E.
+
 ## Checklist
 
 - [ ] Point group of every structure recorded (file + tool), allowed components listed.

@@ -209,6 +209,41 @@ refused to scan when `max abs(E(k) - E(-k)) >= 1e-5 eV` (source: the manifold-ch
   DFT state of the window. A frozen window reproduces DFT to the meV level, so no partner lies lower than that margin.
 - Run the old and the new check on the earlier models. Their results must not change.
 
+## W17. Spinor models: the images of wannier90_wsvec.dat can break time reversal
+
+- **Symptom**: a 44-function spinor model (HSE06 + SOC + field) failed the gate of W6 with max abs(E(k) - E(-k)) =
+  0.68 meV. The breaking in H(R) and A(R) was only 0.09 meV. Most of it came from `wannier90_wsvec.dat`: at R vectors
+  on the boundary of the supercell, two Kramers partners whose centres differ by ~1e-5 A chose different equidistant
+  images.
+- **Checks** for a spinor model: (1) H(R) U = U H(R)* with the fitted Theta = U K (U antisymmetric, Kramers pairs).
+  (2) The image lists of `wsvec` are equal within each Kramers-pair block. (3) E(k) = E(-k) through the engine at
+  2000 random k, all bands.
+- **Fix**: H_s = (H + U H* U^dag)/2 and the same for A, and rebuild `wsvec` from the pair-averaged centres. The model
+  then gave 3.4e-14 eV, and the responses moved by ~0.1 % near the edge.
+- Do not scan a failed model with a k -> -k average as a workaround (B7): it hides the cause. Fix the model, then scan.
+
+## W18. VASP + Wannier90 in library mode: check which WAVECAR is in the folder
+
+- The spinor HSE06 runs stopped with a segmentation fault (exit 139) right after they wrote the Wannier90 files. The
+  files were complete, but VASP never wrote its WAVECAR, CHGCAR or PROCAR. The WAVECAR in the folder was the PBE start,
+  which the run script moved in (its time stamp was the start time).
+- A later request needed the HSE wave functions (parities, projections). The SCF ran again from the same PBE start,
+  with LORBIT = 11, without LWANNIER90, and with NELM = the number of steps of the first run (28). The energy of the
+  last step repeated to all printed digits, and the eigenvalues at Gamma agreed with `.eig` to 7e-9 eV. Cost: about
+  60 CPU-hours.
+- **Rule**: plan the wave-function outputs (LWAVE, LORBIT) of an expensive run before it starts, or run the Wannier90
+  step separately. Check time stamps and sizes of WAVECAR before any analysis.
+
+## W19. Orbital character: read it from PROCAR in the POSCAR axes, not from the Wannier basis
+
+- After disentanglement with `num_iter = 0`, two W functions of a 1T' model were hybrids with centres 0.116 A on each
+  side of the atom. The weights of a band on the Wannier functions did not map onto single cubic d orbitals: a band that
+  PROCAR gave as one d orbital had equal weights on two of the W functions. Only the totals (W d, Te p) agreed, within
+  0.12.
+- Take orbital weights from PROCAR (LORBIT = 11). VASP gives them in the Cartesian axes of the POSCAR. Papers often use
+  other axes. One paper put y along the W chains, so its d_yz is the d_xz of a cell with x along the chains. Write the
+  map next to every comparison.
+
 ## Checklist (copy into the run notes)
 
 - [ ] NBANDS of the NSCF covers the outer window and the first states above the target manifold.

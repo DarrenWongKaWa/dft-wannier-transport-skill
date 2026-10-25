@@ -148,3 +148,23 @@ material data, the figure scripts) and the computation project's paper handoff n
 - [ ] Recomputed by the audit script from the released data; string asserted in the text; negative control done.
 - [ ] Provenance traceable: record id, package version and sha256, script.
 - [ ] After any rewording: invariants checked by script, audit rerun, cross-section consistency pass (N13).
+
+## N17. Check the literature numbers of a plan against the sources
+
+- Read the PDF of each paper (pdftotext and grep), and render the figure pages (`pdftoppm -r 400`, then crop) to read
+  values. Write the version (arXiv vN or journal), the figure panel and "read from the figure" next to each value.
+- A check of six papers in a plan found: fields of one paper misquoted (0.005-0.05 V/a0, but 0-0.03 V/a0 for the
+  structure in question), a statement that the paper does not make (reversal of the field), a structure that differs
+  (a Td monolayer without inversion, not 1T'), and figure panels that do not exist in the arXiv version. A second check
+  found a position given without a unit, "(0, 0.146)": the conversion to A^-1 is then a reading, not a quoted value.
+- Units of a Berry-curvature dipole differ between papers (a0, A, nm), and few say whether the integral has
+  1/(2 pi)^2. A paper that relates D to the current by j = (e^3 tau / hbar^2) D E^2 uses the factor. Compare signs only
+  as relative signs unless the paper gives the field direction and the orientation of the structure.
+
+## N18. "For every Gamma below ..." is a statement over the whole stored grid: script it
+
+- A caption claimed a property of the response near the band edges "for every Gamma below 0.2 E_g". A script over all
+  stored values of Gamma (1850 values of 104 cases near the edges) found exceptions in three of four systems, at small
+  Gamma/delta. The panel itself (one value of Gamma) had none of them.
+- Check each statement of a figure or caption by a script over all stored data, and report the conditions (here a
+  lower bound in Gamma/delta) instead of the statement.

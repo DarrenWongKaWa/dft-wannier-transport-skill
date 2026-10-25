@@ -204,6 +204,57 @@ separately the longest single box.
   converged run of one component at the same settings, or from a larger Gamma. Floor all scales as in B3 and S7.
 - **Source**: the project's candidate-model jobs (2026-10-17).
 
+## B17. A Fermi-line ridge at very small Gamma: nested one-dimensional quadrature
+
+- **Symptom**: mu lay 20 meV inside a band, and Gamma went down to 0.1 meV. Then the integrand of the BCD term is a
+  ridge of width ~Gamma/v (~5e-5 A^-1) along the Fermi line. Two-dimensional HCubature in the two tiles with the Fermi
+  line (each split 4 x 4) used 14 CPU-hours. Only 5 of 32 sub-boxes converged, and 4 others ran 3 hours each.
+- **Fix**: nested adaptive quadrature in the tiles with the Fermi line. The inner rule runs along k1, with breakpoints at
+  the crossings of each band with mu and at +-1e-4 and +-1e-3 of them. The outer rule runs along k2. One integrand
+  vector holds all values of Gamma. Both tiles took 1.5 CPU-hours, with an error of 1e-4. The other tiles stay in the
+  box scan.
+- Pilot first: run one tile at the largest Gamma and count the evaluations. The cost of a 2D rule grows about as
+  1/Gamma.
+- A finite-T kernel at T << Gamma is expensive. At T = 1 K a point took 0.65 s, against 0.018 s at T = 0 (44 bands).
+  The line integral across the Fermi line agreed between T = 0 and 1 K to 3e-5, at Gamma = 0.1 to 1 meV. Scan at T = 0
+  and check one line at the finite T.
+
+## B18. Fermi-surface BCD of Kramers-split pairs: integrate on the Fermi lines
+
+- **Symptom**: in a field-split pair the two bands have almost opposite Berry curvature, and D_x is their small
+  difference. The larger band was up to 87 times the sum at 0.05 V/A, and 458 times at 0.005 V/A. A grid or a linear
+  triangle method multiplies its error by that ratio. A finer grid (16 -> 32 cells per coarse cell) did not reduce the
+  error (5 % of the largest D).
+- **Fix**: find the Fermi line of each band by bisection along rays from the centre of the pocket. Evaluate Omega_n
+  exactly on the line, and take D_x = +-sum_n contour of Omega_n dk_y / (2 pi)^2 (+ for electron pockets, - for hole
+  pockets). The trapezoid rule in the angle converges fast: 192 and 96 angles agreed to 1e-11. Use the grid result only
+  for the shape between the converged points.
+- Check each ray: eps_n - mu must change sign once between the centre and the end. A ray of 0.5 A^-1 reached the
+  pocket at -Q (two sign changes), and 0.25 A^-1 was right. A band whose pocket does not hold the centre gives 0 only if
+  no ray finds a point inside.
+
+## B19. Kramers pairs near a point of time-reversal symmetry stop the engine at random points
+
+- An engine with exact inverse gaps stops when two bands come closer than its threshold (1e-10 eV). Deep bands of a
+  spinor model meet at Gamma. A box at the zone corner can hit such a point after thousands of evaluations, and the
+  point depends on the subdivision. It happened in two jobs (a box at Gamma, deep bands 1-2 and 3-4).
+- **Fix**: run that box alone in a copy of the job with a lower maxevals (10 000). Copy its box file into the job and
+  write a note on the box in job.json. The fingerprint did not depend on the box list, so the box file fits. Then check
+  that every entry that you use is still resolved. One box stayed at 77.6 x its target, but the error bounds still
+  resolved every value of yxx.
+- A zero-field spinor model has twofold bands everywhere, so such an engine cannot run it. Use a small field
+  (0.005 V/A) and test the scaling with the field.
+
+## B20. Gamma grids: reach zero on both sides, about 20 values
+
+- A response-against-Gamma curve must show the rise for Gamma << delta and the decay above the gap or the band width.
+  Seven values (0.5-32 meV) were too few. About 20 values, 0.5 meV x 2^k (k = -8..11), were enough. Add values with a
+  step of 2^(1/4) only where the curve changes fast. A 44-band model needed tail jobs to ~65 eV before the response
+  reached zero. A 2-band model reached ~0 by 1 eV.
+- Measure the steps: the largest change of any curve between neighbouring points, over the scale of the panel. With a
+  target of 0.1, 9 to 18 new points per gate scan were enough for every panel. The measure fell from 0.16-0.28 to
+  0.09-0.10.
+
 ## Checklist
 
 - [ ] Pocket radius computed; smallest planned box smaller than the pocket radius near the band edge.

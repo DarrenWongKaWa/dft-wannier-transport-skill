@@ -122,6 +122,15 @@ per quantity, numeric residual checks, the conversion factor tested to full prec
   gave outputs that differed by 1 ulp between the two (2026-10-17). A build that must give the same bytes on every
   machine uses `math.fsum` (exactly rounded) or a fixed explicit order, and its `--check` mode runs under each version.
 
+## C14. A perpendicular field: external in DFT, often bare in model papers
+
+- VASP EFIELD (with IDIPOL = 3 and LDIPOL) is the external field. In the vacuum next to a gated layer the field is
+  D/epsilon_0, so EFIELD compares with D/epsilon_0 of a device. The self-consistent layer screens it, and inside a monolayer only a few per
+  cent can remain. Measure it from the odd part of the field-on charge density before any comparison.
+- Model calculations in papers often put the field into the Hamiltonian as a bare on-site potential (E^THY, V/a0,
+  eV/A). Convert the units (1 V/a0 = 1.890 V/A) and state "external" or "bare" before any comparison: the same number
+  has a much larger effect as a bare field.
+
 ## Checklist
 
 - [ ] One written definition per quantity (sigma, B, fitted coefficients, E_F, Delta_FS, crossover scales, tau, m_c).
