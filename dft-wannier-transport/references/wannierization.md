@@ -99,6 +99,7 @@ refused to scan when `max abs(E(k) - E(-k)) >= 1e-5 eV` (source: the manifold-ch
   0.40 eV (band 1). Valley-box sampling is not a TRS test.
 - **Gate**: refuse to integrate above 1e-5 eV. Half-zone integration (bz_integration.md B7) is exact only if this
   holds.
+- **Script**: [scripts/trs_gate.py](../scripts/trs_gate.py) is this gate. It gives exit code 1 at or above 1e-5 eV.
 - **Source**: the archived problem report of the superseded package version; the manifold-check queue script.
 
 ## W7. A symmetry projection is a symptom, not a fix

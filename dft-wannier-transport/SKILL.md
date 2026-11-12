@@ -37,7 +37,8 @@ problem reports, run scripts). They document where a lesson was learned; you do 
 - Entangled (band overlap, states with projectability < 0.5)? -> SMV disentanglement; frozen window below the first
   non-target state; outer window = all bands.
 - Converge disentanglement and MLWF (conv_window > 0); rerun with another dis_mix_ratio; compare Omega, centres, H(R).
-- Real H(R), A(R); max abs(E(k) - E(-k)) < 1e-5 eV over the whole BZ, all bands. Gate scripts on it.
+- Real H(R), A(R); max abs(E(k) - E(-k)) < 1e-5 eV over the whole BZ, all bands. Gate scripts on it with
+  [scripts/trs_gate.py](scripts/trs_gate.py).
   Spinor models: also the Kramers relation of H(R) and equal `wsvec` images within each pair ([W17](references/wannierization.md#w17-spinor-models-the-images-of-wannier90_wsvecdat-can-break-time-reversal)).
 - Off-grid error near mu (target: ~1 meV); band edges vs DFT; mu re-derived for this model.
 - Bracket the manifold (smaller and larger) before trusting percent-level numbers.
@@ -144,8 +145,33 @@ problem reports, run scripts). They document where a lesson was learned; you do 
 
 The full list of documented incidents with dates and costs: [incident_index](references/incident_index.md).
 
+## Executable gates
+
+A written rule did not stop a scan of a model that failed the time-reversal gate (incident 62). Thus the costliest
+rules are scripts in [scripts/](scripts/). Exit code 0 = pass. Any other exit code = stop.
+
+| script | rules | exit code 1 (refused) |
+| --- | --- | --- |
+| [trs_gate.py](scripts/trs_gate.py) `MODEL` | W6, W17 | max abs(E(k) - E(-k)) >= 1e-5 eV at 2000 random k, all bands, whole BZ, or H(k) not Hermitian |
+| [preflight.py](scripts/preflight.py) `JOB` | W6, B7, B3, S8 | a check fails: gate certificate for the model file as it is now, half-zone doubling, error scales (10x), forbidden control |
+| [live_workers.py](scripts/live_workers.py) | R6, R20 | worker processes are alive: do not move or rename the tree |
+
+- `MODEL` is a Wannier90 `_hr.dat` or `_tb.dat` file: the file that the engine loads. The gate also reads the wsvec
+  file next to it. If there is none, give `--wsvec FILE`, or `--no-wsvec` if the engine ignores the images. It writes
+  a certificate with the SHA-256 of each file. `trs_gate.py` needs numpy.
+- Put `trs_gate.py` and `preflight.py` in the launcher, before the first worker starts. In a project that has a file
+  `dft_gates.json`, the plugin hook of this folder also runs `preflight.py` before a Bash command that starts a scan.
+  The hook does not see a scan that a wrapper script starts. Setup and the keys of the job file:
+  `python3 scripts/preflight.py --help`, and the README of the repository.
+- After a refusal, correct the cause. Do not continue with a k/-k average, a real-part projection or an edited
+  certificate ([W7](references/wannierization.md#w7-a-symmetry-projection-is-a-symptom-not-a-fix),
+  [W17](references/wannierization.md#w17-spinor-models-the-images-of-wannier90_wsvecdat-can-break-time-reversal)).
+  If you cannot correct the cause, stop and tell the owner.
+
 ## Before you start a long run
 
+- [ ] `scripts/trs_gate.py` gave exit code 0 for the model file, and `scripts/preflight.py` gave exit code 0 for the
+      job file. The launcher runs the two scripts before the first worker.
 - [ ] Model passed every gate: converged, reproducible, real, TRS < 1e-5 eV, off-grid error near mu known, band edges
       match DFT, mu derived on this model and written to full precision.
 - [ ] Components: symmetry-allowed set plus one forbidden control; anchor point certified or planned.
@@ -157,11 +183,14 @@ The full list of documented incidents with dates and costs: [incident_index](ref
 - [ ] Caches, claims and results on local disk outside cloud sync; kill-and-resume tested on a small job.
 - [ ] Thread variables = 1; workers <= free cores; P cores reserved for MPI; priority scheduler if needed.
 - [ ] Nothing will move or rename the tree until the last worker exits; watcher aggregates after the last worker.
+      Before a move or a rename, `scripts/live_workers.py` gives exit code 0.
 - [ ] Inspect after one minute (targets, first box counts); abort cheaply if wrong; archive aborted runs, do not delete.
 
 ## Before you report a number
 
 - [ ] It comes from a filed record (RUN.json): converged, N/N boxes, worst err/target <= 1, package version + sha256.
+- [ ] `scripts/preflight.py` gives exit code 0 for the job file of the record now: the gate certificate is for the
+      model file that made the number.
 - [ ] Independent confirmation: crosscheck run, anchor reproduction, a known limit (e.g. the clean-limit BCD check
       Gamma x (the integrand term whose clean limit is B) / B -> 1), or bitwise reproduction from caches.
 - [ ] Symmetry zeros and partner relations evaluated; residuals stated as model uncertainty.

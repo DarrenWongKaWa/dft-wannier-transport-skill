@@ -1,0 +1,17 @@
+{
+  "description": "In a project that has dft_gates.json: before a Bash command that starts a scan, run scripts/preflight.py on each job file that the command names. Block the command (exit code 2) if the preflight refuses the job.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"${CLAUDE_PROJECT_DIR}/dft_gates.json\" ] || exit 0; python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/preflight.py\" --hook --project \"${CLAUDE_PROJECT_DIR}\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

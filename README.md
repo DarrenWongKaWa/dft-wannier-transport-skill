@@ -36,6 +36,12 @@ dft-wannier-transport/
   references/paper_numbers.md                 audit scripts, negative controls, snapshots, narrative re-checks
   references/conventions_and_units.md         factors of 2, SI sheet units, Delta_FS, tau = hbar/(2 Gamma), mobility, cyclotron mass
   references/incident_index.md                the documented incidents with dates, detection, cost and source
+  scripts/trs_gate.py                         time-reversal gate for a Wannier90 model file (rule W6), writes a certificate
+  scripts/preflight.py                        checks a job file before a scan starts (rules W6, B7, B3, S8)
+  scripts/live_workers.py                     refuses a move or a rename while worker processes are alive (rule R6)
+  hooks/hooks.json                            Claude Code hook: runs preflight.py before a Bash command that starts a scan
+  .claude-plugin/plugin.json                  plugin manifest: Claude Code loads the folder as a plugin, with the hook
+tests/test_gates.py                           must-fail controls for the three scripts (synthetic models)
 ```
 
 ## Install
@@ -67,6 +73,140 @@ Project skill (one repository only): put the folder at `<repo>/.claude/skills/df
 Claude Code loads the skill when a task matches the `description` in `SKILL.md`, or on request ("use the
 dft-wannier-transport skill"). The reference files are read on demand.
 
+The folder is also a Claude Code plugin, because it contains `.claude-plugin/plugin.json`. Claude Code loads such a
+folder in `~/.claude/skills/` as a plugin at the start of each session. Thus Option A and Option B also load the hook
+(see [The hook](#the-hook)). The hook is on only in a project that has a file `dft_gates.json`. To check, run
+`claude plugin list`. It shows `dft-wannier-transport@skills-dir` with the status `loaded`. To stop the hook in all
+projects, run `claude plugin disable dft-wannier-transport@skills-dir`. To load the plugin for one session from a
+clone, run `claude --plugin-dir dft-wannier-transport-skill/dft-wannier-transport`.
+
+## Executable gates
+
+A written rule did not stop a scan of a model that failed the time-reversal gate: 39 runs and 490 CPU-hours, and 24
+runs ran again after the correction (incident 62 in the incident index). Thus the costliest rules are scripts. A
+script that refuses prints the next steps.
+
+| script | it refuses (exit code 1) when | it needs |
+| --- | --- | --- |
+| `trs_gate.py MODEL` | max abs(E(k) - E(-k)) is 1e-5 eV or more, at 2000 random k, for all bands, in the whole zone (rule W6), or H(k) is not Hermitian | Python 3.9, numpy |
+| `preflight.py JOB` | one of the four checks below fails | Python 3.9 |
+| `live_workers.py [--pattern REGEX]` | a process matches the pattern (default: the pattern of rule R6, with `vasp_ncl`, `vasp_gam` and `postw90.x` added) | Python 3.9, ps |
+
+Exit code 0 = pass. Exit code 2 = bad input. The scripts are in `dft-wannier-transport/scripts/`.
+
+**`trs_gate.py`** reads a Wannier90 `_hr.dat` or `_tb.dat` file. Use the file that the engine loads. The gate also
+reads the wsvec file of the model: different images for the two functions of a Kramers pair break E(k) = E(-k)
+although H(R) is symmetric (rule W17). It uses `NAME_wsvec.dat` next to `NAME_hr.dat` or `NAME_tb.dat`, else the only
+file `*wsvec*.dat` in the folder of the model. If there is no such file, or more than one, the gate stops (exit code
+2): give `--wsvec FILE`, or `--no-wsvec` if the engine ignores the images. The gate also refuses an H(k) that is not
+Hermitian: then H(R) and H(-R) of the files do not agree. The gate writes a certificate (`MODEL.trs_gate.json`) with
+the SHA-256 of the bytes that it read, the measured values, the tolerance, the number of k and the seed. It does not
+accept a tolerance above 1e-5 eV or less than 2000 k. Keep the three scripts in one folder: `trs_gate.py` uses the
+wsvec search of `preflight.py`.
+
+**`preflight.py`** is for a job that loads a Wannier90 model file with time-reversal symmetry. It refuses a job that
+names no model file. Thus a job on an analytic model, or on one block of a time-reversal pair (rule B7), is not in its
+scope. It does four checks on a job file:
+
+1. W6: the model file has a certificate, and the gate passed. The SHA-256 values in the certificate are the values of
+   the model file and of its wsvec file now. The wsvec file is the file that the job names, else the file that the
+   gate finds.
+2. B7: half-zone doubling is on only if check 1 passed.
+3. B3: each error scale has an expected magnitude, and no scale is more than 10x below it. A smaller scale is a target
+   that is too strict, as in the incidents of B3. A larger scale passes, because the floors of S7 make the scales of
+   small components larger than their magnitudes. For a component that vanishes by symmetry, write 0. This check
+   runs only if the job gives the two tables.
+4. S8: the job names a symmetry-forbidden control component, and the list of components of the job contains it.
+
+**`live_workers.py`** compares each pattern with the full command line of each process (from `ps`), as `pgrep -f`
+does. It refuses when a worker process is alive. Run it before a move or a rename:
+`python3 live_workers.py && mv OLD NEW`. It ignores itself and every process that started it, for example the shell of
+a wait loop (rule R20).
+
+### The launcher first, the hook second
+
+Put the gate in the launcher. Call `trs_gate.py` and `preflight.py` in the script that starts the workers, before
+the first worker starts:
+
+```bash
+set -uo pipefail
+GATES="$HOME/.claude/skills/dft-wannier-transport/scripts"
+python3 "$GATES/trs_gate.py" "$MODEL" || exit 1
+python3 "$GATES/preflight.py" "$JOB_DIR/job.json" || exit 1
+```
+
+The hook is the second line of defence. It reads the text of a command. Thus it does not see a scan that a wrapper
+script starts (`bash run_all.sh`), unless a launch pattern names that script. It also does not see a job file that the
+launcher writes after the command starts.
+
+### The hook
+
+The `PreToolUse` hook in `hooks/hooks.json` is on only in a project that has a file `dft_gates.json` in the project
+folder. An empty object (`{}`) in that file is sufficient: then the defaults apply. In such a project the hook runs
+`preflight.py --hook` before each Bash command:
+
+1. The hook finds the program of each part of the command. The operators `;`, `&&`, `||`, `|`, `&` and line breaks
+   separate the parts. The hook skips the wrappers `nohup`, `nice`, `env`, `timeout`, `taskpolicy`, `caffeinate`,
+   `mpirun`, `srun`, `xargs`, `uv run` and some others. For an interpreter (`python3`, `julia` and others), it also
+   takes the script. It follows `cd`, `$PWD` and `sh -c`.
+2. A part starts a scan if its program or its script matches a launch pattern. Other parts, for example
+   `pgrep -fl scan_worker` or `grep scan_worker job.json`, do not start a scan. The hook permits them.
+3. A part that starts a scan must name its job file or its job folder as a plain path, or run in the job folder.
+   Otherwise the hook blocks it.
+4. The hook does the four checks on each job file. If a check fails, the hook blocks the command with exit code 2,
+   and Claude gets the refusal text.
+
+- The hook loads with the plugin. It does not depend on a call of the skill.
+- Before you add `dft_gates.json`, make sure that the job files of the project pass `preflight.py`. If they do not,
+  the hook blocks each command that starts workers for them.
+- The hook needs `python3` on the PATH. It uses the standard library only.
+- Claude Code 2.1.314 or later is necessary for the hook to see commands that the Monitor tool starts. Earlier
+  versions run the hook for the Bash tool only.
+- The hook takes the project folder from `CLAUDE_PROJECT_DIR`.
+
+### Config file
+
+A file `dft_gates.json` in the project folder sets the hook to on for the project. It also changes the launch
+patterns and the keys of the job file. All keys are optional. This example shows the defaults:
+
+```json
+{
+  "launch_patterns": ["scan_worker"],
+  "job_file_name": "job.json",
+  "scale_factor": 10,
+  "fields": {
+    "model": "model",
+    "wsvec": "wsvec",
+    "certificate": "trs_certificate",
+    "half_zone": "half_zone",
+    "scales": "scales",
+    "expected": "expected_magnitudes",
+    "components": "components",
+    "forbidden_control": "forbidden_control"
+  }
+}
+```
+
+- `launch_patterns`: regular expressions for the program or the script that starts workers. Give one pattern for
+  each of them in your project (worker, launcher, add-workers script, pool script).
+- `fields`: the key in the job file for each quantity. `"inputs.tb_file"` is the key `tb_file` in the object `inputs`.
+- `model`, `wsvec`, `certificate`: paths, relative to the folder of the job file or to the project folder. Without a
+  `certificate` key in the job file, the certificate is `MODEL.trs_gate.json`. Without a `wsvec` key, the preflight
+  uses the wsvec file that the gate finds.
+- `scales`, `expected`: objects `{component: number or list of numbers}`.
+- An unknown key in `dft_gates.json` is an error, so that a typo does not remove a check. While the file is not
+  valid, the hook blocks each command that names a job file.
+
+### Tests
+
+```bash
+python3 -m pytest
+```
+
+The tests need numpy and pytest. Each check of each script has a case that must fail. For example, a symmetric
+synthetic model passes the gate, an asymmetric model fails, and the preflight refuses a certificate with a wrong hash.
+All test files are synthetic. They follow the file layouts of Wannier90 3.1.0.
+
 ## Contributing a lesson
 
 Add a lesson only when it comes from a real, documented incident. Write it in the same structure as the existing
@@ -85,6 +225,8 @@ Put the rule in the matching file under `references/` with a numbered heading (e
 one-line pitfall to `SKILL.md` only if it is among the most costly. Keep
 `SKILL.md` under ~250 lines and check that every link and `#anchor` resolves. Do not invent incidents or provenance:
 unknown stays UNKNOWN.
+
+After a change to a script, run `python3 -m pytest`. Keep a case that must fail for each check of each script.
 
 ## License
 

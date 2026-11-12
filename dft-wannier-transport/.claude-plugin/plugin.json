@@ -1,0 +1,10 @@
+{
+  "name": "dft-wannier-transport",
+  "description": "Engineering rules for DFT -> Wannier90 -> tight-binding -> Brillouin-zone transport, with executable gates: a time-reversal gate, a job preflight and a live-worker check. In a project that has dft_gates.json, a PreToolUse hook runs the preflight before a Bash command that starts a scan.",
+  "author": {
+    "name": "Kawa Wong"
+  },
+  "repository": "https://github.com/DarrenWongKaWa/dft-wannier-transport-skill",
+  "license": "MIT",
+  "keywords": ["dft", "wannier90", "tight-binding", "transport", "brillouin-zone", "gates"]
+}
