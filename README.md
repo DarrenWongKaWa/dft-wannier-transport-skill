@@ -88,32 +88,40 @@ script that refuses prints the next steps.
 
 | script | it refuses (exit code 1) when | it needs |
 | --- | --- | --- |
-| `trs_gate.py MODEL` | max abs(E(k) - E(-k)) is 1e-5 eV or more, at 2000 random k, for all bands, in the whole zone (rule W6) | Python 3.9, numpy |
+| `trs_gate.py MODEL` | max abs(E(k) - E(-k)) is 1e-5 eV or more, at 2000 random k, for all bands, in the whole zone (rule W6), or H(k) is not Hermitian | Python 3.9, numpy |
 | `preflight.py JOB` | one of the four checks below fails | Python 3.9 |
-| `live_workers.py [--pattern REGEX]` | a process matches the pattern (default: the pattern of rule R6) | Python 3.9, pgrep |
+| `live_workers.py [--pattern REGEX]` | a process matches the pattern (default: the pattern of rule R6, with `vasp_ncl`, `vasp_gam` and `postw90.x` added) | Python 3.9, ps |
 
 Exit code 0 = pass. Exit code 2 = bad input. The scripts are in `dft-wannier-transport/scripts/`.
 
 **`trs_gate.py`** reads a Wannier90 `_hr.dat` or `_tb.dat` file. Use the file that the engine loads. The gate also
-reads `NAME_wsvec.dat` if it is next to `NAME_hr.dat` or `NAME_tb.dat`: different images for the two functions of a
-Kramers pair break E(k) = E(-k) although H(R) is symmetric (rule W17). `--wsvec FILE` gives a different file. Use
-`--no-wsvec` only if the engine ignores the images. The gate writes a certificate (`MODEL.trs_gate.json`) with the
-SHA-256 of each file, the measured value, the tolerance, the number of k and the seed. The gate does not accept a
-tolerance above 1e-5 eV or less than 2000 k.
+reads the wsvec file of the model: different images for the two functions of a Kramers pair break E(k) = E(-k)
+although H(R) is symmetric (rule W17). It uses `NAME_wsvec.dat` next to `NAME_hr.dat` or `NAME_tb.dat`, else the only
+file `*wsvec*.dat` in the folder of the model. If there is no such file, or more than one, the gate stops (exit code
+2): give `--wsvec FILE`, or `--no-wsvec` if the engine ignores the images. The gate also refuses an H(k) that is not
+Hermitian: then H(R) and H(-R) of the files do not agree. The gate writes a certificate (`MODEL.trs_gate.json`) with
+the SHA-256 of the bytes that it read, the measured values, the tolerance, the number of k and the seed. It does not
+accept a tolerance above 1e-5 eV or less than 2000 k. Keep the three scripts in one folder: `trs_gate.py` uses the
+wsvec search of `preflight.py`.
 
 **`preflight.py`** is for a job that loads a Wannier90 model file with time-reversal symmetry. It refuses a job that
 names no model file. Thus a job on an analytic model, or on one block of a time-reversal pair (rule B7), is not in its
 scope. It does four checks on a job file:
 
-1. W6: the model file has a certificate, the gate passed, and the SHA-256 in the certificate is the SHA-256 of the
-   model file now. The same applies to the wsvec file that the job names, or that is next to the model file.
+1. W6: the model file has a certificate, and the gate passed. The SHA-256 values in the certificate are the values of
+   the model file and of its wsvec file now. The wsvec file is the file that the job names, else the file that the
+   gate finds.
 2. B7: half-zone doubling is on only if check 1 passed.
-3. B3: each error scale agrees with the expected magnitude within a factor of 10. This check runs only if the job
-   gives the two tables. It ignores an expected magnitude of 0 (a value that vanishes by symmetry, rule S7).
-4. S8: the job names a minimum of one symmetry-forbidden control component, and the component is in the job.
+3. B3: each error scale has an expected magnitude, and no scale is more than 10x below it. A smaller scale is a target
+   that is too strict, as in the incidents of B3. A larger scale passes, because the floors of S7 make the scales of
+   small components larger than their magnitudes. For a component that vanishes by symmetry, write 0. This check
+   runs only if the job gives the two tables.
+4. S8: the job names a symmetry-forbidden control component, and the list of components of the job contains it.
 
-**`live_workers.py`** runs `pgrep -f` and refuses when a worker process is alive. Run it before a move or a rename:
-`python3 live_workers.py && mv OLD NEW`. It ignores itself and the shells that call it (rule R20).
+**`live_workers.py`** compares each pattern with the full command line of each process (from `ps`), as `pgrep -f`
+does. It refuses when a worker process is alive. Run it before a move or a rename:
+`python3 live_workers.py && mv OLD NEW`. It ignores itself and every process that started it, for example the shell of
+a wait loop (rule R20).
 
 ### The launcher first, the hook second
 
@@ -127,9 +135,9 @@ python3 "$GATES/trs_gate.py" "$MODEL" || exit 1
 python3 "$GATES/preflight.py" "$JOB_DIR/job.json" || exit 1
 ```
 
-The hook is the second line of defence. It compares the text of a command with the launch patterns. Thus it does not
-see a scan that a wrapper script starts (`bash run_all.sh`). It also does not see a job file that the launcher writes
-after the command starts.
+The hook is the second line of defence. It reads the text of a command. Thus it does not see a scan that a wrapper
+script starts (`bash run_all.sh`), unless a launch pattern names that script. It also does not see a job file that the
+launcher writes after the command starts.
 
 ### The hook
 
@@ -137,10 +145,15 @@ The `PreToolUse` hook in `hooks/hooks.json` is on only in a project that has a f
 folder. An empty object (`{}`) in that file is sufficient: then the defaults apply. In such a project the hook runs
 `preflight.py --hook` before each Bash command:
 
-1. If the command matches no launch pattern, the hook permits the command.
-2. If the command matches, the hook looks for job files in the command text: a path to a file `job.json`, or a folder
-   that contains `job.json`.
-3. The hook does the four checks on each job file. If a check fails, the hook blocks the command with exit code 2,
+1. The hook finds the program of each part of the command. The operators `;`, `&&`, `||`, `|`, `&` and line breaks
+   separate the parts. The hook skips the wrappers `nohup`, `nice`, `env`, `timeout`, `taskpolicy`, `caffeinate`,
+   `mpirun`, `srun`, `xargs`, `uv run` and some others. For an interpreter (`python3`, `julia` and others), it also
+   takes the script. It follows `cd`, `$PWD` and `sh -c`.
+2. A part starts a scan if its program or its script matches a launch pattern. Other parts, for example
+   `pgrep -fl scan_worker` or `grep scan_worker job.json`, do not start a scan. The hook permits them.
+3. A part that starts a scan must name its job file or its job folder as a plain path, or run in the job folder.
+   Otherwise the hook blocks it.
+4. The hook does the four checks on each job file. If a check fails, the hook blocks the command with exit code 2,
    and Claude gets the refusal text.
 
 - The hook loads with the plugin. It does not depend on a call of the skill.
@@ -174,14 +187,15 @@ patterns and the keys of the job file. All keys are optional. This example shows
 }
 ```
 
-- `launch_patterns`: regular expressions. A command that matches one of them starts a scan. Give one pattern for
-  each command that starts workers in your project (launcher, add-workers script, pool script).
+- `launch_patterns`: regular expressions for the program or the script that starts workers. Give one pattern for
+  each of them in your project (worker, launcher, add-workers script, pool script).
 - `fields`: the key in the job file for each quantity. `"inputs.tb_file"` is the key `tb_file` in the object `inputs`.
 - `model`, `wsvec`, `certificate`: paths, relative to the folder of the job file or to the project folder. Without a
   `certificate` key in the job file, the certificate is `MODEL.trs_gate.json`. Without a `wsvec` key, the preflight
-  uses `NAME_wsvec.dat` next to the model file, if that file is there.
+  uses the wsvec file that the gate finds.
 - `scales`, `expected`: objects `{component: number or list of numbers}`.
-- An unknown key in `dft_gates.json` is an error, so that a typo does not remove a check.
+- An unknown key in `dft_gates.json` is an error, so that a typo does not remove a check. While the file is not
+  valid, the hook blocks each command that names a job file.
 
 ### Tests
 
@@ -189,7 +203,7 @@ patterns and the keys of the job file. All keys are optional. This example shows
 python3 -m pytest
 ```
 
-The tests need numpy and pytest. Each script has a case that must pass and a case that must fail: a symmetric
+The tests need numpy and pytest. Each check of each script has a case that must fail. For example, a symmetric
 synthetic model passes the gate, an asymmetric model fails, and the preflight refuses a certificate with a wrong hash.
 All test files are synthetic. They follow the file layouts of Wannier90 3.1.0.
 

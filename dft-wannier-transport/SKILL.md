@@ -152,13 +152,13 @@ rules are scripts in [scripts/](scripts/). Exit code 0 = pass. Any other exit co
 
 | script | rules | exit code 1 (refused) |
 | --- | --- | --- |
-| [trs_gate.py](scripts/trs_gate.py) `MODEL` | W6, W17 | max abs(E(k) - E(-k)) >= 1e-5 eV at 2000 random k, all bands, whole BZ |
+| [trs_gate.py](scripts/trs_gate.py) `MODEL` | W6, W17 | max abs(E(k) - E(-k)) >= 1e-5 eV at 2000 random k, all bands, whole BZ, or H(k) not Hermitian |
 | [preflight.py](scripts/preflight.py) `JOB` | W6, B7, B3, S8 | a check fails: gate certificate for the model file as it is now, half-zone doubling, error scales (10x), forbidden control |
 | [live_workers.py](scripts/live_workers.py) | R6, R20 | worker processes are alive: do not move or rename the tree |
 
-- `MODEL` is a Wannier90 `_hr.dat` or `_tb.dat` file: the file that the engine loads. The gate also reads the
-  `_wsvec.dat` file next to it (`--wsvec FILE` gives a different file). It writes a certificate with the SHA-256 of
-  each file. `trs_gate.py` needs numpy.
+- `MODEL` is a Wannier90 `_hr.dat` or `_tb.dat` file: the file that the engine loads. The gate also reads the wsvec
+  file next to it. If there is none, give `--wsvec FILE`, or `--no-wsvec` if the engine ignores the images. It writes
+  a certificate with the SHA-256 of each file. `trs_gate.py` needs numpy.
 - Put `trs_gate.py` and `preflight.py` in the launcher, before the first worker starts. In a project that has a file
   `dft_gates.json`, the plugin hook of this folder also runs `preflight.py` before a Bash command that starts a scan.
   The hook does not see a scan that a wrapper script starts. Setup and the keys of the job file:
