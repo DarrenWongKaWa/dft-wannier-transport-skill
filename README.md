@@ -75,9 +75,10 @@ dft-wannier-transport skill"). The reference files are read on demand.
 
 The folder is also a Claude Code plugin, because it contains `.claude-plugin/plugin.json`. Claude Code loads such a
 folder in `~/.claude/skills/` as a plugin at the start of each session. Thus Option A and Option B also load the hook
-(see [The hook](#the-hook)). To check, run `claude plugin list`. It shows `dft-wannier-transport@skills-dir` with the
-status `loaded`. To stop the hook, run `claude plugin disable dft-wannier-transport@skills-dir`. To load the plugin
-for one session from a clone, run `claude --plugin-dir dft-wannier-transport-skill/dft-wannier-transport`.
+(see [The hook](#the-hook)). The hook is on only in a project that has a file `dft_gates.json`. To check, run
+`claude plugin list`. It shows `dft-wannier-transport@skills-dir` with the status `loaded`. To stop the hook in all
+projects, run `claude plugin disable dft-wannier-transport@skills-dir`. To load the plugin for one session from a
+clone, run `claude --plugin-dir dft-wannier-transport-skill/dft-wannier-transport`.
 
 ## Executable gates
 
@@ -100,7 +101,9 @@ Kramers pair break E(k) = E(-k) although H(R) is symmetric (rule W17). `--wsvec 
 SHA-256 of each file, the measured value, the tolerance, the number of k and the seed. The gate does not accept a
 tolerance above 1e-5 eV or less than 2000 k.
 
-**`preflight.py`** does four checks on a job file:
+**`preflight.py`** is for a job that loads a Wannier90 model file with time-reversal symmetry. It refuses a job that
+names no model file. Thus a job on an analytic model, or on one block of a time-reversal pair (rule B7), is not in its
+scope. It does four checks on a job file:
 
 1. W6: the model file has a certificate, the gate passed, and the SHA-256 in the certificate is the SHA-256 of the
    model file now. The same applies to the wsvec file that the job names, or that is next to the model file.
@@ -130,7 +133,9 @@ after the command starts.
 
 ### The hook
 
-The `PreToolUse` hook in `hooks/hooks.json` runs `preflight.py --hook` before each Bash command:
+The `PreToolUse` hook in `hooks/hooks.json` is on only in a project that has a file `dft_gates.json` in the project
+folder. An empty object (`{}`) in that file is sufficient: then the defaults apply. In such a project the hook runs
+`preflight.py --hook` before each Bash command:
 
 1. If the command matches no launch pattern, the hook permits the command.
 2. If the command matches, the hook looks for job files in the command text: a path to a file `job.json`, or a folder
@@ -139,6 +144,8 @@ The `PreToolUse` hook in `hooks/hooks.json` runs `preflight.py --hook` before ea
    and Claude gets the refusal text.
 
 - The hook loads with the plugin. It does not depend on a call of the skill.
+- Before you add `dft_gates.json`, make sure that the job files of the project pass `preflight.py`. If they do not,
+  the hook blocks each command that starts workers for them.
 - The hook needs `python3` on the PATH. It uses the standard library only.
 - Claude Code 2.1.314 or later is necessary for the hook to see commands that the Monitor tool starts. Earlier
   versions run the hook for the Bash tool only.
@@ -146,8 +153,8 @@ The `PreToolUse` hook in `hooks/hooks.json` runs `preflight.py --hook` before ea
 
 ### Config file
 
-A file `dft_gates.json` in the project folder changes the launch patterns and the keys of the job file. All keys are
-optional. This example shows the defaults:
+A file `dft_gates.json` in the project folder sets the hook to on for the project. It also changes the launch
+patterns and the keys of the job file. All keys are optional. This example shows the defaults:
 
 ```json
 {
@@ -184,6 +191,7 @@ python3 -m pytest
 
 The tests need numpy and pytest. Each script has a case that must pass and a case that must fail: a symmetric
 synthetic model passes the gate, an asymmetric model fails, and the preflight refuses a certificate with a wrong hash.
+All test files are synthetic. They follow the file layouts of Wannier90 3.1.0.
 
 ## Contributing a lesson
 

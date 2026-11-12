@@ -256,9 +256,13 @@ def test_hook_blocks_only_a_launch_of_a_refused_job(tmp_path):              # mu
         return call("preflight.py", "--hook", stdin=json.dumps(event), env=env)
 
     launch = "nohup julia scan_worker.jl " + str(tmp_path) + " 3 > worker_3.log 2>&1 &"     # names the job folder
+    (tmp_path / "dft_gates.json").write_text("{}")                          # the config file turns the hook on
     assert hook(launch) == (0, "", "")
     with open(model, "a") as fh:
         fh.write("\n")
+    os.remove(tmp_path / "dft_gates.json")
+    assert hook(launch) == (0, "", "")                                       # no config file: the hook is off
+    (tmp_path / "dft_gates.json").write_text("{}")
     code, out, err = hook(launch)
     assert code == 2 and out == "" and "Blocked by the preflight hook" in err and "SHA-256" in err
     assert hook("ls -la job.json")[0] == 0                                   # not a launch command

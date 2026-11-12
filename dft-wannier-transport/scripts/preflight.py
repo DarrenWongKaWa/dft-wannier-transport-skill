@@ -4,7 +4,8 @@
     python3 preflight.py JOB.json [JOB.json ...] [--project DIR]
     python3 preflight.py --hook        # Claude Code PreToolUse hook: reads the hook event (JSON) from stdin
 
-Put the first form in the launcher, before the first worker starts. The hook is the second line of defence.
+Put the first form in the launcher, before the first worker starts. The hook is the second line of defence. The hook
+is on only in a project that has the config file.
 
 Checks:
   W6  The model file of the job has a certificate from trs_gate.py. The gate passed, and the SHA-256 in the
@@ -268,6 +269,8 @@ def hook(a):
         return 0
     cwd = event.get("cwd") if isinstance(event.get("cwd"), str) else None
     project = a.project or os.environ.get("CLAUDE_PROJECT_DIR") or cwd or os.getcwd()
+    if not os.path.isfile(os.path.join(project, CONFIG_NAME)):
+        return 0                                         # the hook is on only in a project that has the config file
     try:
         cfg, problem = load_config(project), ""
     except (OSError, ValueError) as err:

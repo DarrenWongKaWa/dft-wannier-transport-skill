@@ -159,10 +159,10 @@ rules are scripts in [scripts/](scripts/). Exit code 0 = pass. Any other exit co
 - `MODEL` is a Wannier90 `_hr.dat` or `_tb.dat` file: the file that the engine loads. The gate also reads the
   `_wsvec.dat` file next to it (`--wsvec FILE` gives a different file). It writes a certificate with the SHA-256 of
   each file. `trs_gate.py` needs numpy.
-- Put `trs_gate.py` and `preflight.py` in the launcher, before the first worker starts. The plugin hook of this folder
-  runs `preflight.py` before a Bash command that starts a scan, but the hook does not see a scan that a wrapper
-  script starts. Setup and the keys of the job file: `python3 scripts/preflight.py --help`, and the README of the
-  repository.
+- Put `trs_gate.py` and `preflight.py` in the launcher, before the first worker starts. In a project that has a file
+  `dft_gates.json`, the plugin hook of this folder also runs `preflight.py` before a Bash command that starts a scan.
+  The hook does not see a scan that a wrapper script starts. Setup and the keys of the job file:
+  `python3 scripts/preflight.py --help`, and the README of the repository.
 - After a refusal, correct the cause. Do not continue with a k/-k average, a real-part projection or an edited
   certificate ([W7](references/wannierization.md#w7-a-symmetry-projection-is-a-symptom-not-a-fix),
   [W17](references/wannierization.md#w17-spinor-models-the-images-of-wannier90_wsvecdat-can-break-time-reversal)).
